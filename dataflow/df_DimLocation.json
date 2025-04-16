@@ -1,0 +1,169 @@
+{
+	"name": "df_DimLocation",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "ds_StageChicago",
+						"type": "DatasetReference"
+					},
+					"name": "sourceChicago"
+				},
+				{
+					"dataset": {
+						"referenceName": "ds_StageDallas",
+						"type": "DatasetReference"
+					},
+					"name": "sourceDallas"
+				},
+				{
+					"dataset": {
+						"referenceName": "ds_DimLocation",
+						"type": "DatasetReference"
+					},
+					"name": "DimLocationMaxId"
+				},
+				{
+					"dataset": {
+						"referenceName": "ds_DimLocation",
+						"type": "DatasetReference"
+					},
+					"name": "DimLocation"
+				}
+			],
+			"sinks": [],
+			"transformations": [
+				{
+					"name": "FinalChicago"
+				},
+				{
+					"name": "FinalDallas"
+				},
+				{
+					"name": "union1"
+				},
+				{
+					"name": "join1"
+				},
+				{
+					"name": "aggregate1"
+				},
+				{
+					"name": "join2"
+				},
+				{
+					"name": "select1"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          INSPECTION_ID as decimal(38,0),",
+				"          DBA_NAME as string,",
+				"          AKA_NAME as string,",
+				"          LICENSE_NUM as decimal(38,0),",
+				"          FACILITY_TYPE as string,",
+				"          RISK as string,",
+				"          ADDRESS as string,",
+				"          CITY as string,",
+				"          STATE as string,",
+				"          ZIP_CODE as string,",
+				"          INSPECTION_DATE as date,",
+				"          INSPECTION_TYPE as string,",
+				"          RESULTS as string,",
+				"          VIOLATIONS_INFO as string,",
+				"          LATITUDE as double,",
+				"          LONGITUDE as double,",
+				"          LOCATION as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'table') ~> sourceChicago",
+				"source(output(",
+				"          ROWID as decimal(38,0),",
+				"          RESTAURANT_NAME as string,",
+				"          ALSO_KNOWN_AS_NAME as string,",
+				"          LICENSE_NUM as decimal(38,0),",
+				"          FACILITY_TYPE as string,",
+				"          RISK as string,",
+				"          STREET_ADDRESS as string,",
+				"          CITY as string,",
+				"          STATE as string,",
+				"          ZIP_CODE as string,",
+				"          INSPECTION_DATE as date,",
+				"          INSPECTION_TYPE as string,",
+				"          RESULTS as string,",
+				"          VIOLATIONS_INFO as string,",
+				"          LATITUDE as double,",
+				"          LONGITUDE as double,",
+				"          LOCATION as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'table') ~> sourceDallas",
+				"source(output(",
+				"          MAXLOCATIONSK as decimal(38,0)",
+				"     ),",
+				"     allowSchemaDrift: false,",
+				"     validateSchema: false,",
+				"     query: 'select NVL(MAX(LOCATION_ID_SK),0) as MaxLocationSK FROM CD_SCHEMA.DIM_LOCATION',",
+				"     format: 'query') ~> DimLocationMaxId",
+				"source(output(",
+				"          LOCATION_ID_SK as decimal(38,0),",
+				"          STREET_ADDRESS as string,",
+				"          CITY as string,",
+				"          STATE as string,",
+				"          ZIP as string,",
+				"          LATITUDE as double,",
+				"          LONGITUDE as double,",
+				"          LOCATION as string,",
+				"          DATA_SOURCE_ID as string,",
+				"          DATA_WORKFLOW_NAME as string,",
+				"          DW_JOB_ID as string,",
+				"          DW_LOAD_DT as date",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'table') ~> DimLocation",
+				"sourceChicago derive(DATA_SOURCE_ID = 'Chicago23') ~> FinalChicago",
+				"sourceDallas derive(DATA_SOURCE_ID = 'Dallas23') ~> FinalDallas",
+				"FinalChicago, FinalDallas union(byName: false)~> union1",
+				"union1, DimLocationMaxId join(1==1,",
+				"     joinType:'cross',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> join1",
+				"join1 aggregate(groupBy(ADDRESS,",
+				"          CITY,",
+				"          STATE,",
+				"          ZIP_CODE,",
+				"          LATITUDE,",
+				"          LONGITUDE,",
+				"          LOCATION,",
+				"          DATA_SOURCE_ID,",
+				"          MAXLOCATIONSK),",
+				"     CountRow = count(INSPECTION_ID)) ~> aggregate1",
+				"aggregate1, DimLocation join(aggregate1@CITY == DimLocation@CITY,",
+				"     joinType:'left',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> join2",
+				"join2 select(mapColumn(",
+				"          STREET_ADDRESS = ADDRESS,",
+				"          CITY = aggregate1@CITY,",
+				"          STATE = aggregate1@STATE,",
+				"          ZIP_CODE,",
+				"          LATITUDE = aggregate1@LATITUDE,",
+				"          LONGITUDE = aggregate1@LONGITUDE,",
+				"          LOCATION = aggregate1@LOCATION,",
+				"          DATA_SOURCE_ID = aggregate1@DATA_SOURCE_ID,",
+				"          MAXLOCATIONSK,",
+				"          LOCATION_ID_SK",
+				"     ),",
+				"     skipDuplicateMapInputs: false,",
+				"     skipDuplicateMapOutputs: false) ~> select1"
+			]
+		}
+	}
+}

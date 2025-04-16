@@ -1,0 +1,233 @@
+{
+	"name": "df_DimRestaurant",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "ds_StageChicago",
+						"type": "DatasetReference"
+					},
+					"name": "sourceChicago"
+				},
+				{
+					"dataset": {
+						"referenceName": "ds_StageDallas",
+						"type": "DatasetReference"
+					},
+					"name": "sourceDallas"
+				},
+				{
+					"dataset": {
+						"referenceName": "ds_DimRestaurant",
+						"type": "DatasetReference"
+					},
+					"name": "DimRestaurantMaxId"
+				},
+				{
+					"dataset": {
+						"referenceName": "ds_DimRestaurant",
+						"type": "DatasetReference"
+					},
+					"name": "DimRestaurant"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "ds_DimRestaurant",
+						"type": "DatasetReference"
+					},
+					"name": "sink1"
+				}
+			],
+			"transformations": [
+				{
+					"name": "union1"
+				},
+				{
+					"name": "join1"
+				},
+				{
+					"name": "aggregate1"
+				},
+				{
+					"name": "join2"
+				},
+				{
+					"name": "select1"
+				},
+				{
+					"name": "surrogateKey1"
+				},
+				{
+					"name": "derivedColumn1"
+				},
+				{
+					"name": "select2"
+				},
+				{
+					"name": "derivedColumn2"
+				},
+				{
+					"name": "finalDallas"
+				}
+			],
+			"scriptLines": [
+				"parameters{",
+				"     Job_Id as string ('19')",
+				"}",
+				"source(output(",
+				"          INSPECTION_ID as decimal(38,0),",
+				"          DBA_NAME as string,",
+				"          AKA_NAME as string,",
+				"          LICENSE_NUM as decimal(38,0),",
+				"          FACILITY_TYPE as string,",
+				"          RISK as string,",
+				"          ADDRESS as string,",
+				"          CITY as string,",
+				"          STATE as string,",
+				"          ZIP_CODE as string,",
+				"          INSPECTION_DATE as date,",
+				"          INSPECTION_TYPE as string,",
+				"          RESULTS as string,",
+				"          VIOLATIONS_INFO as string,",
+				"          LATITUDE as double,",
+				"          LONGITUDE as double,",
+				"          LOCATION as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'table') ~> sourceChicago",
+				"source(output(",
+				"          ROWID as decimal(38,0),",
+				"          RESTAURANT_NAME as string,",
+				"          ALSO_KNOWN_AS_NAME as string,",
+				"          LICENSE_NUM as decimal(38,0),",
+				"          FACILITY_TYPE as string,",
+				"          RISK as string,",
+				"          STREET_ADDRESS as string,",
+				"          CITY as string,",
+				"          STATE as string,",
+				"          ZIP_CODE as string,",
+				"          INSPECTION_DATE as date,",
+				"          INSPECTION_TYPE as string,",
+				"          RESULTS as string,",
+				"          VIOLATIONS_INFO as string,",
+				"          LATITUDE as double,",
+				"          LONGITUDE as double,",
+				"          LOCATION as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'table') ~> sourceDallas",
+				"source(output(",
+				"          MAXRESTAURANTSK as decimal(38,0)",
+				"     ),",
+				"     allowSchemaDrift: false,",
+				"     validateSchema: false,",
+				"     query: 'select NVL(MAX(RESTAURANT_ID_SK),0) as MaxRestaurantSK FROM CD_SCHEMA.DIM_RESTAURANT',",
+				"     format: 'query') ~> DimRestaurantMaxId",
+				"source(output(",
+				"          RESTAURANT_ID_SK as decimal(38,0),",
+				"          RESTAURANT_NAME as string,",
+				"          ALSO_KNOWN_AS_NAME as string,",
+				"          LICENSE_NUMBER as decimal(38,0),",
+				"          FACILITY_TYPE as string,",
+				"          DATA_SOURCE_ID as string,",
+				"          DATA_WORKFLOW_NAME as string,",
+				"          DW_JOB_ID as string,",
+				"          DW_LOAD_DT as date",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'table') ~> DimRestaurant",
+				"derivedColumn2, finalDallas union(byName: false)~> union1",
+				"union1, DimRestaurantMaxId join(1==1,",
+				"     joinType:'cross',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> join1",
+				"join1 aggregate(groupBy(MAXRESTAURANTSK,",
+				"          DBA_NAME,",
+				"          AKA_NAME,",
+				"          LICENSE_NUM,",
+				"          FACILITY_TYPE,",
+				"          DATA_SOURCE_ID),",
+				"     CountRow = count(INSPECTION_ID)) ~> aggregate1",
+				"aggregate1, DimRestaurant join(DBA_NAME == RESTAURANT_NAME,",
+				"     joinType:'left',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> join2",
+				"join2 select(mapColumn(",
+				"          MAXRESTAURANTSK,",
+				"          DBA_NAME,",
+				"          AKA_NAME,",
+				"          LICENSE_NUM,",
+				"          FACILITY_TYPE = aggregate1@FACILITY_TYPE,",
+				"          CountRow,",
+				"          RESTAURANT_ID_SK,",
+				"          DATA_SOURCE_ID = aggregate1@DATA_SOURCE_ID",
+				"     ),",
+				"     skipDuplicateMapInputs: false,",
+				"     skipDuplicateMapOutputs: false) ~> select1",
+				"select1 keyGenerate(output(RowNum as long),",
+				"     startAt: 1L,",
+				"     stepValue: 1L) ~> surrogateKey1",
+				"surrogateKey1 derive(RESTAURANT_ID_SK = MAXRESTAURANTSK+RowNum,",
+				"          DW_JOB_ID = $Job_Id,",
+				"          DW_JOB_DT = currentDate(),",
+				"          DATA_WORKFLOW_NAME = 'df_DimRestaurant') ~> derivedColumn1",
+				"derivedColumn1 select(mapColumn(",
+				"          RESTAURANT_ID_SK,",
+				"          DBA_NAME,",
+				"          AKA_NAME,",
+				"          LICENSE_NUM,",
+				"          FACILITY_TYPE,",
+				"          DATA_SOURCE_ID,",
+				"          DATA_WORKFLOW_NAME,",
+				"          DW_JOB_ID,",
+				"          DW_JOB_DT",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select2",
+				"sourceChicago derive(DATA_SOURCE_ID = 'Chicago23') ~> derivedColumn2",
+				"sourceDallas derive(DATA_SOURCE_ID = 'Dallas23') ~> finalDallas",
+				"select2 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          RESTAURANT_ID_SK as decimal(38,0),",
+				"          RESTAURANT_NAME as string,",
+				"          ALSO_KNOWN_AS_NAME as string,",
+				"          LICENSE_NUMBER as decimal(38,0),",
+				"          FACILITY_TYPE as string,",
+				"          DATA_SOURCE_ID as string,",
+				"          DATA_WORKFLOW_NAME as string,",
+				"          DW_JOB_ID as string,",
+				"          DW_LOAD_DT as date",
+				"     ),",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     stageInsert: true,",
+				"     mapColumn(",
+				"          RESTAURANT_ID_SK,",
+				"          RESTAURANT_NAME = DBA_NAME,",
+				"          ALSO_KNOWN_AS_NAME = AKA_NAME,",
+				"          LICENSE_NUMBER = LICENSE_NUM,",
+				"          FACILITY_TYPE,",
+				"          DATA_SOURCE_ID,",
+				"          DATA_WORKFLOW_NAME,",
+				"          DW_JOB_ID,",
+				"          DW_LOAD_DT = DW_JOB_DT",
+				"     )) ~> sink1"
+			]
+		}
+	}
+}

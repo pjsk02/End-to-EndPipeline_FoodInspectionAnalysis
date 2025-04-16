@@ -55,6 +55,21 @@
 				},
 				{
 					"name": "join1"
+				},
+				{
+					"name": "aggregate1"
+				},
+				{
+					"name": "join2"
+				},
+				{
+					"name": "surrogateKey1"
+				},
+				{
+					"name": "derivedColumn4"
+				},
+				{
+					"name": "select3"
 				}
 			],
 			"scriptLines": [
@@ -122,7 +137,10 @@
 				"     allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     format: 'table') ~> DimLocation",
-				"source(allowSchemaDrift: true,",
+				"source(output(",
+				"          MAXLOCATIONSK as decimal(38,0)",
+				"     ),",
+				"     allowSchemaDrift: false,",
 				"     validateSchema: false,",
 				"     query: 'select NVL(MAX(LOCATION_ID_SK),0) as MaxLocationSK FROM CD_SCHEMA.DIM_LOCATION',",
 				"     format: 'query') ~> DimLocationMaxId",
@@ -173,11 +191,41 @@
 				"derivedColumn1, stageDallas union(byName: true)~> union1",
 				"union1 derive(DW_JOB_ID = $Job_Id,",
 				"          DW_LOAD_DT = currentDate()) ~> derivedColumn3",
-				"derivedColumn3 join(ERROR_FUNCTION('') == ERROR_FUNCTION(''),",
-				"     joinType:'inner',",
+				"derivedColumn3, DimLocationMaxId join(1==1,",
+				"     joinType:'cross',",
 				"     matchType:'exact',",
 				"     ignoreSpaces: false,",
-				"     broadcast: 'auto')~> join1"
+				"     broadcast: 'auto')~> join1",
+				"join1 aggregate(groupBy(MAXLOCATIONSK,",
+				"          LOCATION,",
+				"          CITY),",
+				"     CountRow = count(INSPECTION_ID)) ~> aggregate1",
+				"aggregate1, DimLocation join(aggregate1@LOCATION == DimLocation@LOCATION,",
+				"     joinType:'left',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> join2",
+				"select3 keyGenerate(output(RowNum as long),",
+				"     startAt: 1L,",
+				"     stepValue: 1L) ~> surrogateKey1",
+				"surrogateKey1 derive(LOCATION_ID_SK = MAXLOCATIONSK+RowNum) ~> derivedColumn4",
+				"join2 select(mapColumn(",
+				"          MAXLOCATIONSK,",
+				"          LOCATION = aggregate1@LOCATION,",
+				"          LOCATION_ID_SK,",
+				"          STREET_ADDRESS,",
+				"          CITY = DimLocation@CITY,",
+				"          STATE,",
+				"          ZIP,",
+				"          LATITUDE,",
+				"          LONGITUDE,",
+				"          DATA_SOURCE_ID,",
+				"          DATA_WORKFLOW_NAME,",
+				"          DW_JOB_ID,",
+				"          DW_LOAD_DT",
+				"     ),",
+				"     skipDuplicateMapInputs: false,",
+				"     skipDuplicateMapOutputs: false) ~> select3"
 			]
 		}
 	}

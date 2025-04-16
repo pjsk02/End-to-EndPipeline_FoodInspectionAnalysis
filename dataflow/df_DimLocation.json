@@ -10,6 +10,13 @@
 						"type": "DatasetReference"
 					},
 					"name": "stageChicago"
+				},
+				{
+					"dataset": {
+						"referenceName": "ds_StageDallas",
+						"type": "DatasetReference"
+					},
+					"name": "stageDallas"
 				}
 			],
 			"sinks": [],
@@ -36,7 +43,29 @@
 				"     ),",
 				"     allowSchemaDrift: true,",
 				"     validateSchema: false,",
-				"     format: 'table') ~> stageChicago"
+				"     format: 'table') ~> stageChicago",
+				"source(output(",
+				"          ROWID as decimal(38,0),",
+				"          RESTAURANT_NAME as string,",
+				"          ALSO_KNOWN_AS_NAME as string,",
+				"          LICENSE_NUM as decimal(38,0),",
+				"          FACILITY_TYPE as string,",
+				"          RISK as string,",
+				"          STREET_ADDRESS as string,",
+				"          CITY as string,",
+				"          STATE as string,",
+				"          ZIP_CODE as string,",
+				"          INSPECTION_DATE as date,",
+				"          INSPECTION_TYPE as string,",
+				"          RESULTS as string,",
+				"          VIOLATIONS_INFO as string,",
+				"          LATITUDE as double,",
+				"          LONGITUDE as double,",
+				"          LOCATION as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'table') ~> stageDallas"
 			]
 		}
 	}

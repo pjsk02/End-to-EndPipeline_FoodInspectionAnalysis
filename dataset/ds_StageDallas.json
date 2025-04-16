@@ -1,0 +1,93 @@
+{
+	"name": "ds_StageDallas",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "Chicago_Dallas_Snowflake",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "SnowflakeV2Table",
+		"schema": [
+			{
+				"name": "ROWID",
+				"type": "NUMBER",
+				"precision": 38,
+				"scale": 0
+			},
+			{
+				"name": "RESTAURANT_NAME",
+				"type": "VARCHAR"
+			},
+			{
+				"name": "ALSO_KNOWN_AS_NAME",
+				"type": "VARCHAR"
+			},
+			{
+				"name": "LICENSE_NUM",
+				"type": "NUMBER",
+				"precision": 38,
+				"scale": 0
+			},
+			{
+				"name": "FACILITY_TYPE",
+				"type": "VARCHAR"
+			},
+			{
+				"name": "RISK",
+				"type": "VARCHAR"
+			},
+			{
+				"name": "STREET_ADDRESS",
+				"type": "VARCHAR"
+			},
+			{
+				"name": "CITY",
+				"type": "VARCHAR"
+			},
+			{
+				"name": "STATE",
+				"type": "VARCHAR"
+			},
+			{
+				"name": "ZIP_CODE",
+				"type": "VARCHAR"
+			},
+			{
+				"name": "INSPECTION_DATE",
+				"type": "DATE"
+			},
+			{
+				"name": "INSPECTION_TYPE",
+				"type": "VARCHAR"
+			},
+			{
+				"name": "RESULTS",
+				"type": "VARCHAR"
+			},
+			{
+				"name": "VIOLATIONS_INFO",
+				"type": "VARCHAR"
+			},
+			{
+				"name": "LATITUDE",
+				"type": "FLOAT",
+				"precision": 38,
+				"scale": 0
+			},
+			{
+				"name": "LONGITUDE",
+				"type": "FLOAT",
+				"precision": 38,
+				"scale": 0
+			},
+			{
+				"name": "LOCATION",
+				"type": "VARCHAR"
+			}
+		],
+		"typeProperties": {
+			"schema": "CD_SCHEMA",
+			"table": "STAGE_DALLAS_INSPECTIONS"
+		}
+	}
+}

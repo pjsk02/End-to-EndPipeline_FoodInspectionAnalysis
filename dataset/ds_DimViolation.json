@@ -16,9 +16,7 @@
 			},
 			{
 				"name": "VIOLATION_CODE",
-				"type": "NUMBER",
-				"precision": 38,
-				"scale": 0
+				"type": "VARCHAR"
 			},
 			{
 				"name": "VIOLATION_DESCRIPTION",

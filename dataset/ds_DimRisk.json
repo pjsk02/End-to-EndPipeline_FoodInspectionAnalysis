@@ -1,5 +1,5 @@
 {
-	"name": "ds_DimInspection",
+	"name": "ds_DimRisk",
 	"properties": {
 		"linkedServiceName": {
 			"referenceName": "Chicago_Dallas_Snowflake",
@@ -9,14 +9,13 @@
 		"type": "SnowflakeV2Table",
 		"schema": [
 			{
-    		"name": "INSPECTION_ID_SK",
+				"name": "RISK_ID_SK",
 				"type": "NUMBER",
 				"precision": 38,
 				"scale": 0
 			},
 			{
-
-				"name": "INSPECTION_TYPE",
+				"name": "RISK_LEVEL",
 				"type": "VARCHAR"
 			},
 			{
@@ -38,8 +37,7 @@
 		],
 		"typeProperties": {
 			"schema": "CD_SCHEMA",
-
-			"table": "DIM_INSPECTION"
+			"table": "DIM_RISK"
 		}
 	}
 }

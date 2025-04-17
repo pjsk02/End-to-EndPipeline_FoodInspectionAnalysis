@@ -1,0 +1,216 @@
+{
+	"name": "df_DimRisk",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "ds_StageChicago",
+						"type": "DatasetReference"
+					},
+					"name": "sourceChicago"
+				},
+				{
+					"dataset": {
+						"referenceName": "ds_StageDallas",
+						"type": "DatasetReference"
+					},
+					"name": "sourceDallas"
+				},
+				{
+					"dataset": {
+						"referenceName": "ds_DimRisk",
+						"type": "DatasetReference"
+					},
+					"name": "DimRiskMaxId"
+				},
+				{
+					"dataset": {
+						"referenceName": "ds_DimRisk",
+						"type": "DatasetReference"
+					},
+					"name": "DimRisk"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "ds_DimRisk",
+						"type": "DatasetReference"
+					},
+					"name": "sink1"
+				}
+			],
+			"transformations": [
+				{
+					"name": "derivedColumn1"
+				},
+				{
+					"name": "derivedColumn2"
+				},
+				{
+					"name": "union1"
+				},
+				{
+					"name": "join1"
+				},
+				{
+					"name": "aggregate1"
+				},
+				{
+					"name": "join2"
+				},
+				{
+					"name": "select1"
+				},
+				{
+					"name": "surrogateKey1"
+				},
+				{
+					"name": "derivedColumn3"
+				},
+				{
+					"name": "select2"
+				}
+			],
+			"scriptLines": [
+				"parameters{",
+				"     JOB_ID as string ('39')",
+				"}",
+				"source(output(",
+				"          INSPECTION_ID as decimal(38,0),",
+				"          DBA_NAME as string,",
+				"          AKA_NAME as string,",
+				"          LICENSE_NUM as decimal(38,0),",
+				"          FACILITY_TYPE as string,",
+				"          RISK as string,",
+				"          ADDRESS as string,",
+				"          CITY as string,",
+				"          STATE as string,",
+				"          ZIP_CODE as string,",
+				"          INSPECTION_DATE as date,",
+				"          INSPECTION_TYPE as string,",
+				"          RESULTS as string,",
+				"          VIOLATIONS_INFO as string,",
+				"          LATITUDE as double,",
+				"          LONGITUDE as double,",
+				"          LOCATION as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'table') ~> sourceChicago",
+				"source(output(",
+				"          ROWID as decimal(38,0),",
+				"          RESTAURANT_NAME as string,",
+				"          ALSO_KNOWN_AS_NAME as string,",
+				"          LICENSE_NUM as decimal(38,0),",
+				"          FACILITY_TYPE as string,",
+				"          RISK as string,",
+				"          STREET_ADDRESS as string,",
+				"          CITY as string,",
+				"          STATE as string,",
+				"          ZIP_CODE as string,",
+				"          INSPECTION_DATE as date,",
+				"          INSPECTION_TYPE as string,",
+				"          RESULTS as string,",
+				"          VIOLATIONS_INFO as string,",
+				"          LATITUDE as double,",
+				"          LONGITUDE as double,",
+				"          LOCATION as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'table') ~> sourceDallas",
+				"source(output(",
+				"          MAXRISKSK as decimal(38,0)",
+				"     ),",
+				"     allowSchemaDrift: false,",
+				"     validateSchema: false,",
+				"     query: 'select NVL(MAX(RISK_ID_SK),0) as MaxRiskSK FROM CD_SCHEMA.DIM_RISK',",
+				"     format: 'query') ~> DimRiskMaxId",
+				"source(output(",
+				"          RISK_ID_SK as decimal(38,0),",
+				"          RISK_LEVEL as string,",
+				"          DATA_SOURCE_ID as string,",
+				"          DATA_WORKFLOW_NAME as string,",
+				"          DW_JOB_ID as string,",
+				"          DW_LOAD_DT as date",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'table') ~> DimRisk",
+				"sourceChicago derive(DATA_SOURCE_ID = 'Chicago23') ~> derivedColumn1",
+				"sourceDallas derive(DATA_SOURCE_ID = 'Dallas23') ~> derivedColumn2",
+				"derivedColumn1, derivedColumn2 union(byName: false)~> union1",
+				"union1, DimRiskMaxId join(1==1,",
+				"     joinType:'cross',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> join1",
+				"join1 aggregate(groupBy(DATA_SOURCE_ID,",
+				"          RISK,",
+				"          MAXRISKSK),",
+				"     CountRow = count(INSPECTION_ID)) ~> aggregate1",
+				"aggregate1, DimRisk join(RISK == RISK_LEVEL,",
+				"     joinType:'left',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> join2",
+				"join2 select(mapColumn(",
+				"          RISK,",
+				"          MAXRISKSK,",
+				"          CountRow,",
+				"          RISK_ID_SK,",
+				"          RISK_LEVEL,",
+				"          DATA_SOURCE_ID = aggregate1@DATA_SOURCE_ID",
+				"     ),",
+				"     skipDuplicateMapInputs: false,",
+				"     skipDuplicateMapOutputs: false) ~> select1",
+				"select1 keyGenerate(output(ROWNUM as long),",
+				"     startAt: 1L,",
+				"     stepValue: 1L) ~> surrogateKey1",
+				"surrogateKey1 derive(RISK_ID_SK = MAXRISKSK+ROWNUM,",
+				"          DW_JOB_ID = $JOB_ID,",
+				"          DW_LOAD_DT = currentDate(),",
+				"          DATA_WORKFLOW_NAME = 'df_DimRisk') ~> derivedColumn3",
+				"derivedColumn3 select(mapColumn(",
+				"          RISK_ID_SK,",
+				"          RISK_LEVEL = RISK,",
+				"          DATA_SOURCE_ID,",
+				"          DATA_WORKFLOW_NAME,",
+				"          DW_JOB_ID,",
+				"          DW_LOAD_DT",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select2",
+				"select2 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          RISK_ID_SK as decimal(38,0),",
+				"          RISK_LEVEL as string,",
+				"          DATA_SOURCE_ID as string,",
+				"          DATA_WORKFLOW_NAME as string,",
+				"          DW_JOB_ID as string,",
+				"          DW_LOAD_DT as date",
+				"     ),",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     stageInsert: true,",
+				"     mapColumn(",
+				"          RISK_ID_SK,",
+				"          RISK_LEVEL,",
+				"          DATA_SOURCE_ID,",
+				"          DATA_WORKFLOW_NAME,",
+				"          DW_JOB_ID,",
+				"          DW_LOAD_DT",
+				"     )) ~> sink1"
+			]
+		}
+	}
+}

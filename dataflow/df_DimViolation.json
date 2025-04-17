@@ -1,5 +1,5 @@
 {
-	"name": "df_DimRisk",
+	"name": "df_DimViolation",
 	"properties": {
 		"type": "MappingDataFlow",
 		"typeProperties": {
@@ -20,28 +20,20 @@
 				},
 				{
 					"dataset": {
-						"referenceName": "ds_DimRisk",
+						"referenceName": "ds_DimInspection",
 						"type": "DatasetReference"
 					},
-					"name": "DimRiskMaxId"
+					"name": "DimInspectionMaxId"
 				},
 				{
 					"dataset": {
-						"referenceName": "ds_DimRisk",
+						"referenceName": "ds_DimInspection",
 						"type": "DatasetReference"
 					},
-					"name": "DimRisk"
+					"name": "DimInspection"
 				}
 			],
-			"sinks": [
-				{
-					"dataset": {
-						"referenceName": "ds_DimRisk",
-						"type": "DatasetReference"
-					},
-					"name": "sink1"
-				}
-			],
+			"sinks": [],
 			"transformations": [
 				{
 					"name": "derivedColumn1"
@@ -57,27 +49,9 @@
 				},
 				{
 					"name": "aggregate1"
-				},
-				{
-					"name": "join2"
-				},
-				{
-					"name": "select1"
-				},
-				{
-					"name": "surrogateKey1"
-				},
-				{
-					"name": "derivedColumn3"
-				},
-				{
-					"name": "select2"
 				}
 			],
 			"scriptLines": [
-				"parameters{",
-				"     JOB_ID as string ('39')",
-				"}",
 				"source(output(",
 				"          INSPECTION_ID as decimal(38,0),",
 				"          DBA_NAME as string,",
@@ -123,15 +97,16 @@
 				"     validateSchema: false,",
 				"     format: 'table') ~> sourceDallas",
 				"source(output(",
-				"          MAXRISKSK as decimal(38,0)",
+				"          MAXINSPECTIONSK as decimal(38,0)",
 				"     ),",
 				"     allowSchemaDrift: false,",
 				"     validateSchema: false,",
-				"     query: 'select NVL(MAX(RISK_ID_SK),0) as MaxRiskSK FROM CD_SCHEMA.DIM_RISK',",
-				"     format: 'query') ~> DimRiskMaxId",
+				"     query: 'select NVL(MAX(INSPECTION_ID_SK),0) as MaxInspectionSK FROM CD_SCHEMA.DIM_INSPECTION',",
+				"     format: 'query') ~> DimInspectionMaxId",
 				"source(output(",
-				"          RISK_ID_SK as decimal(38,0),",
-				"          RISK_LEVEL as string,",
+				"          VIOLATION_ID_SK as decimal(38,0),",
+				"          VIOLATION_CODE as decimal(38,0),",
+				"          VIOLATION_DESCRIPTION as string,",
 				"          DATA_SOURCE_ID as string,",
 				"          DATA_WORKFLOW_NAME as string,",
 				"          DW_JOB_ID as string,",
@@ -139,77 +114,18 @@
 				"     ),",
 				"     allowSchemaDrift: true,",
 				"     validateSchema: false,",
-				"     format: 'table') ~> DimRisk",
+				"     format: 'table') ~> DimInspection",
 				"sourceChicago derive(DATA_SOURCE_ID = 'Chicago23') ~> derivedColumn1",
 				"sourceDallas derive(DATA_SOURCE_ID = 'Dallas23') ~> derivedColumn2",
 				"derivedColumn1, derivedColumn2 union(byName: false)~> union1",
-				"union1, DimRiskMaxId join(1==1,",
+				"union1, DimInspectionMaxId join(1==1,",
 				"     joinType:'cross',",
 				"     matchType:'exact',",
 				"     ignoreSpaces: false,",
 				"     broadcast: 'auto')~> join1",
-				"join1 aggregate(groupBy(DATA_SOURCE_ID,",
-				"          RISK,",
-				"          MAXRISKSK),",
-				"     CountRow = count(INSPECTION_ID)) ~> aggregate1",
-				"aggregate1, DimRisk join(RISK == RISK_LEVEL,",
-				"     joinType:'left',",
-				"     matchType:'exact',",
-				"     ignoreSpaces: false,",
-				"     broadcast: 'auto')~> join2",
-				"join2 select(mapColumn(",
-				"          RISK,",
-				"          MAXRISKSK,",
-				"          CountRow,",
-				"          RISK_ID_SK,",
-				"          RISK_LEVEL,",
-				"          DATA_SOURCE_ID = aggregate1@DATA_SOURCE_ID",
-				"     ),",
-				"     skipDuplicateMapInputs: false,",
-				"     skipDuplicateMapOutputs: false) ~> select1",
-				"select1 keyGenerate(output(ROWNUM as long),",
-				"     startAt: 1L,",
-				"     stepValue: 1L) ~> surrogateKey1",
-				"surrogateKey1 derive(RISK_ID_SK = MAXRISKSK+ROWNUM,",
-				"          DW_JOB_ID = $JOB_ID,",
-				"          DW_LOAD_DT = currentDate(),",
-				"          DATA_WORKFLOW_NAME = 'df_DimRisk') ~> derivedColumn3",
-				"derivedColumn3 select(mapColumn(",
-				"          RISK_ID_SK,",
-				"          RISK_LEVEL = RISK,",
-				"          DATA_SOURCE_ID,",
-				"          DATA_WORKFLOW_NAME,",
-				"          DW_JOB_ID,",
-				"          DW_LOAD_DT",
-				"     ),",
-				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true) ~> select2",
-				"select2 sink(allowSchemaDrift: true,",
-				"     validateSchema: false,",
-				"     input(",
-				"          RISK_ID_SK as decimal(38,0),",
-				"          RISK_LEVEL as string,",
-				"          DATA_SOURCE_ID as string,",
-				"          DATA_WORKFLOW_NAME as string,",
-				"          DW_JOB_ID as string,",
-				"          DW_LOAD_DT as date",
-				"     ),",
-				"     deletable:false,",
-				"     insertable:true,",
-				"     updateable:false,",
-				"     upsertable:false,",
-				"     format: 'table',",
-				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true,",
-				"     stageInsert: true,",
-				"     mapColumn(",
-				"          RISK_ID_SK,",
-				"          RISK_LEVEL,",
-				"          DATA_SOURCE_ID,",
-				"          DATA_WORKFLOW_NAME,",
-				"          DW_JOB_ID,",
-				"          DW_LOAD_DT",
-				"     )) ~> sink1"
+				"join1 aggregate(groupBy(MAXINSPECTIONSK,",
+				"          {} = ERROR_FUNCTION('')),",
+				"     CountRow = count(INSPECTION_ID)) ~> aggregate1"
 			]
 		}
 	}

@@ -1,0 +1,157 @@
+{
+	"name": "df_DimViolation",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "Parquet_Violations_Optimised",
+						"type": "DatasetReference"
+					},
+					"name": "source1"
+				},
+				{
+					"dataset": {
+						"referenceName": "ds_DimViolation",
+						"type": "DatasetReference"
+					},
+					"name": "DimViolationMaxId"
+				},
+				{
+					"dataset": {
+						"referenceName": "ds_DimViolation",
+						"type": "DatasetReference"
+					},
+					"name": "DimViolaiton"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "ds_DimViolation",
+						"type": "DatasetReference"
+					},
+					"name": "sink1"
+				}
+			],
+			"transformations": [
+				{
+					"name": "join1"
+				},
+				{
+					"name": "join2"
+				},
+				{
+					"name": "select1"
+				},
+				{
+					"name": "derivedColumn1"
+				},
+				{
+					"name": "surrogateKey1"
+				},
+				{
+					"name": "select2"
+				}
+			],
+			"scriptLines": [
+				"parameters{",
+				"     Job_Id as string ('49')",
+				"}",
+				"source(output(",
+				"          Violation_Code as double,",
+				"          Violation_Description as string,",
+				"          DATA_SOURCE_ID as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false,",
+				"     format: 'parquet') ~> source1",
+				"source(output(",
+				"          MAXVIOLATIONSK as decimal(38,0)",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     query: 'select NVL(MAX(VIOLATION_ID_SK),0) as MaxViolationSK FROM CD_SCHEMA.DIM_VIOLATION',",
+				"     format: 'query') ~> DimViolationMaxId",
+				"source(output(",
+				"          VIOLATION_ID_SK as decimal(38,0),",
+				"          VIOLATION_CODE as decimal(38,0),",
+				"          VIOLATION_DESCRIPTION as string,",
+				"          DATA_SOURCE_ID as string,",
+				"          DATA_WORKFLOW_NAME as string,",
+				"          DW_JOB_ID as string,",
+				"          DW_LOAD_DT as date",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'table') ~> DimViolaiton",
+				"source1, DimViolationMaxId join(1==1,",
+				"     joinType:'cross',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> join1",
+				"join1, DimViolaiton join(source1@Violation_Code == DimViolaiton@VIOLATION_CODE,",
+				"     joinType:'left',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> join2",
+				"join2 select(mapColumn(",
+				"          Violation_Code = source1@Violation_Code,",
+				"          Violation_Description = source1@Violation_Description,",
+				"          DATA_SOURCE_ID = source1@DATA_SOURCE_ID,",
+				"          MAXVIOLATIONSK",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select1",
+				"surrogateKey1 derive(VIOLATION_ID_SK = MAXVIOLATIONSK+RowNum,",
+				"          DW_JOB_ID = $Job_Id,",
+				"          DW_LOAD_DT = currentDate(),",
+				"          DATA_WORKFLOW_NAME = 'df_DimViolation') ~> derivedColumn1",
+				"select1 keyGenerate(output(RowNum as long),",
+				"     startAt: 1L,",
+				"     stepValue: 1L) ~> surrogateKey1",
+				"derivedColumn1 select(mapColumn(",
+				"          VIOLATION_ID_SK,",
+				"          Violation_Code,",
+				"          Violation_Description,",
+				"          DATA_SOURCE_ID,",
+				"          DATA_WORKFLOW_NAME,",
+				"          DW_JOB_ID,",
+				"          DW_LOAD_DT",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select2",
+				"select2 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          VIOLATION_ID_SK as decimal(38,0),",
+				"          VIOLATION_CODE as decimal(38,0),",
+				"          VIOLATION_DESCRIPTION as string,",
+				"          DATA_SOURCE_ID as string,",
+				"          DATA_WORKFLOW_NAME as string,",
+				"          DW_JOB_ID as string,",
+				"          DW_LOAD_DT as date",
+				"     ),",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     stageInsert: true,",
+				"     mapColumn(",
+				"          VIOLATION_ID_SK,",
+				"          VIOLATION_CODE = Violation_Code,",
+				"          VIOLATION_DESCRIPTION = Violation_Description,",
+				"          DATA_SOURCE_ID,",
+				"          DATA_WORKFLOW_NAME,",
+				"          DW_JOB_ID,",
+				"          DW_LOAD_DT",
+				"     )) ~> sink1"
+			]
+		}
+	}
+}

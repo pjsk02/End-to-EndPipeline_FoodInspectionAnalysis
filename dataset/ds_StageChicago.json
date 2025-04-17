@@ -1,0 +1,93 @@
+{
+	"name": "ds_StageChicago",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "Chicago_Dallas_Snowflake",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "SnowflakeV2Table",
+		"schema": [
+			{
+				"name": "INSPECTION_ID",
+				"type": "NUMBER",
+				"precision": 38,
+				"scale": 0
+			},
+			{
+				"name": "DBA_NAME",
+				"type": "VARCHAR"
+			},
+			{
+				"name": "AKA_NAME",
+				"type": "VARCHAR"
+			},
+			{
+				"name": "LICENSE_NUM",
+				"type": "NUMBER",
+				"precision": 38,
+				"scale": 0
+			},
+			{
+				"name": "FACILITY_TYPE",
+				"type": "VARCHAR"
+			},
+			{
+				"name": "RISK",
+				"type": "VARCHAR"
+			},
+			{
+				"name": "ADDRESS",
+				"type": "VARCHAR"
+			},
+			{
+				"name": "CITY",
+				"type": "VARCHAR"
+			},
+			{
+				"name": "STATE",
+				"type": "VARCHAR"
+			},
+			{
+				"name": "ZIP_CODE",
+				"type": "VARCHAR"
+			},
+			{
+				"name": "INSPECTION_DATE",
+				"type": "DATE"
+			},
+			{
+				"name": "INSPECTION_TYPE",
+				"type": "VARCHAR"
+			},
+			{
+				"name": "RESULTS",
+				"type": "VARCHAR"
+			},
+			{
+				"name": "VIOLATIONS_INFO",
+				"type": "VARCHAR"
+			},
+			{
+				"name": "LATITUDE",
+				"type": "FLOAT",
+				"precision": 38,
+				"scale": 0
+			},
+			{
+				"name": "LONGITUDE",
+				"type": "FLOAT",
+				"precision": 38,
+				"scale": 0
+			},
+			{
+				"name": "LOCATION",
+				"type": "VARCHAR"
+			}
+		],
+		"typeProperties": {
+			"schema": "CD_SCHEMA",
+			"table": "STAGE_CHICAGO_INSPECTIONS"
+		}
+	}
+}

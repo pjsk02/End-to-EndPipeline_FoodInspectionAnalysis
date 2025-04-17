@@ -76,6 +76,8 @@
 			{
 				"name": "Load_DimResult",
 				"type": "ExecuteDataFlow",
+				"state": "Inactive",
+				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [
 					{
 						"activity": "Load_DimLocation",
@@ -113,6 +115,8 @@
 			{
 				"name": "Load_DimRisk",
 				"type": "ExecuteDataFlow",
+				"state": "Inactive",
+				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [
 					{
 						"activity": "Load_DimResult",

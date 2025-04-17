@@ -193,6 +193,8 @@
 			{
 				"name": "Load_DimViolation",
 				"type": "ExecuteDataFlow",
+				"state": "Inactive",
+				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [
 					{
 						"activity": "Load_DimInspection",

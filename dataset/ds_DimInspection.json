@@ -9,19 +9,14 @@
 		"type": "SnowflakeV2Table",
 		"schema": [
 			{
-				"name": "VIOLATION_ID_SK",
+    		"name": "INSPECTION_ID_SK",
 				"type": "NUMBER",
 				"precision": 38,
 				"scale": 0
 			},
 			{
-				"name": "VIOLATION_CODE",
-				"type": "NUMBER",
-				"precision": 38,
-				"scale": 0
-			},
-			{
-				"name": "VIOLATION_DESCRIPTION",
+
+				"name": "INSPECTION_TYPE",
 				"type": "VARCHAR"
 			},
 			{
@@ -43,7 +38,8 @@
 		],
 		"typeProperties": {
 			"schema": "CD_SCHEMA",
-			"table": "DIM_VIOLATION"
+
+			"table": "DIM_INSPECTION"
 		}
 	}
 }

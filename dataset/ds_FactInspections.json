@@ -57,7 +57,7 @@
 				"scale": 0
 			},
 			{
-				"name": "VIOLATION_INFO",
+				"name": "VIOLATION_COMMENT",
 				"type": "VARCHAR"
 			},
 			{

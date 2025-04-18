@@ -213,13 +213,10 @@
 				"userProperties": [],
 				"typeProperties": {
 					"dataflow": {
-						"referenceName": "df_DimViolation",
+						"referenceName": "df_DimViolation_Final",
 						"type": "DataFlowReference",
 						"parameters": {
-							"Job_Id": {
-								"value": "'@{pipeline().RunId}'",
-								"type": "Expression"
-							}
+							"JobId": "'12'"
 						}
 					},
 					"compute": {

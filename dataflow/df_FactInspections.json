@@ -279,7 +279,7 @@
 				"     format: 'table') ~> DimResult",
 				"source(output(",
 				"          VIOLATION_ID_SK as decimal(38,0),",
-				"          VIOLATION_CODE as double,",
+				"          VIOLATION_CODE as string,",
 				"          VIOLATION_DESCRIPTION as string,",
 				"          DATA_SOURCE_ID as string,",
 				"          DATA_WORKFLOW_NAME as string,",

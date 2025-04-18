@@ -48,7 +48,7 @@
 				},
 				{
 					"dataset": {
-						"referenceName": "ds_FactInspections",
+						"referenceName": "ds_DimInspection",
 						"type": "DatasetReference"
 					},
 					"name": "DimInspection"
@@ -136,7 +136,7 @@
 					"name": "join9"
 				},
 				{
-					"name": "select4"
+					"name": "selectXXXXX"
 				}
 			],
 			"scriptLines": [
@@ -245,16 +245,8 @@
 				"     validateSchema: false,",
 				"     format: 'table') ~> DimLocation",
 				"source(output(",
-				"          FACT_INSPECTION_ID_SK as decimal(38,0),",
-				"          RESTAURANT_ID_SK as decimal(38,0),",
-				"          LOCATION_ID_SK as decimal(38,0),",
 				"          INSPECTION_ID_SK as decimal(38,0),",
-				"          RISK_ID_SK as decimal(38,0),",
-				"          DATE_ID_SK as decimal(38,0),",
-				"          RESULT_ID_SK as decimal(38,0),",
-				"          VIOLATION_ID_SK as decimal(38,0),",
-				"          VIOLATION_INFO as string,",
-				"          INSPECTION_CNT as decimal(38,0),",
+				"          INSPECTION_TYPE as string,",
 				"          DATA_SOURCE_ID as string,",
 				"          DATA_WORKFLOW_NAME as string,",
 				"          DW_JOB_ID as string,",
@@ -333,8 +325,11 @@
 				"     matchType:'exact',",
 				"     ignoreSpaces: false,",
 				"     broadcast: 'auto')~> join2",
-				"select3, DimRestaurant join(xRESTAURANT_ID_SK == RESTAURANT_ID_SK,",
-				"     joinType:'right',",
+				"union1, DimRestaurant join(DBA_NAME == RESTAURANT_NAME",
+				"     && AKA_NAME == ALSO_KNOWN_AS_NAME",
+				"     && LICENSE_NUM == LICENSE_NUMBER",
+				"     && union1@FACILITY_TYPE == DimRestaurant@FACILITY_TYPE,",
+				"     joinType:'inner',",
 				"     matchType:'exact',",
 				"     ignoreSpaces: false,",
 				"     broadcast: 'auto')~> join3",
@@ -379,32 +374,38 @@
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true) ~> select3",
-				"join3, DimLocation join(xLOCATION_ID_SK == LOCATION_ID_SK,",
-				"     joinType:'right',",
+				"join3, DimLocation join(ADDRESS == STREET_ADDRESS",
+				"     && union1@STATE == DimLocation@STATE",
+				"     && union1@CITY == DimLocation@CITY",
+				"     && ZIP_CODE == ZIP",
+				"     && union1@LATITUDE == DimLocation@LATITUDE",
+				"     && union1@LONGITUDE == DimLocation@LONGITUDE",
+				"     && union1@LOCATION == DimLocation@LOCATION,",
+				"     joinType:'inner',",
 				"     matchType:'exact',",
 				"     ignoreSpaces: false,",
 				"     broadcast: 'auto')~> join4",
-				"join4, DimInspection join(xINSPECTION_ID_SK == INSPECTION_ID_SK,",
-				"     joinType:'right',",
+				"join4, DimInspection join(union1@INSPECTION_TYPE == DimInspection@INSPECTION_TYPE,",
+				"     joinType:'inner',",
 				"     matchType:'exact',",
 				"     ignoreSpaces: false,",
 				"     broadcast: 'auto')~> join5",
-				"join5, DimRisk join(xRISK_ID_SK == DimRisk@RISK_ID_SK,",
-				"     joinType:'right',",
+				"join5, DimRisk join(RISK == RISK_LEVEL,",
+				"     joinType:'inner',",
 				"     matchType:'exact',",
 				"     ignoreSpaces: false,",
 				"     broadcast: 'auto')~> join6",
-				"join6, DimDate join(xDATE_ID_SK == DimDate@DATE_ID_SK,",
-				"     joinType:'right',",
+				"join6, DimDate join(INSPECTION_DATE == DT,",
+				"     joinType:'inner',",
 				"     matchType:'exact',",
 				"     ignoreSpaces: false,",
 				"     broadcast: 'auto')~> join7",
-				"join7, DimResult join(xRESULT_ID_SK == DimResult@RESULT_ID_SK,",
-				"     joinType:'right',",
+				"join7, DimResult join(RESULTS == INSPECTION_RESULTS,",
+				"     joinType:'inner',",
 				"     matchType:'exact',",
 				"     ignoreSpaces: false,",
 				"     broadcast: 'auto')~> join8",
-				"join8, DimViolation join(xVIOLATION_ID_SK == DimViolation@VIOLATION_ID_SK,",
+				"join8, DimViolation join(ERROR_FUNCTION('') == ERROR_FUNCTION(''),",
 				"     joinType:'right',",
 				"     matchType:'exact',",
 				"     ignoreSpaces: false,",
@@ -414,7 +415,7 @@
 				"               /* Input name */ $$ = $$)",
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true) ~> select4"
+				"     skipDuplicateMapOutputs: true) ~> selectXXXXX"
 			]
 		}
 	}

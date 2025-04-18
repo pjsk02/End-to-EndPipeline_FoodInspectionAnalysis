@@ -16,7 +16,7 @@
 			},
 			{
 				"name": "VIOLATION_CODE",
-				"type": "FLOAT"
+				"type": "VARCHAR"
 			},
 			{
 				"name": "VIOLATION_DESCRIPTION",

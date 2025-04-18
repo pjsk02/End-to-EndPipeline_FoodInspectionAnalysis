@@ -179,7 +179,7 @@
 				"select1 keyGenerate(output(RowNum as long),",
 				"     startAt: 1L,",
 				"     stepValue: 1L) ~> surrogateKey1",
-				"surrogateKey1 derive(VIOLATION_ID_SK = MAXVIOLATIONSK+CountRow,",
+				"surrogateKey1 derive(VIOLATION_ID_SK = MAXVIOLATIONSK+RowNum,",
 				"          DATA_WORKFLOW_NAME = 'df_DimViolation',",
 				"          DW_JOB_ID = $JobId,",
 				"          DW_LOAD_DT = currentDate()) ~> derivedColumn3",

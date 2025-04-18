@@ -6,13 +6,6 @@
 			"sources": [
 				{
 					"dataset": {
-						"referenceName": "Parquet_Violations_Optimised",
-						"type": "DatasetReference"
-					},
-					"name": "source1"
-				},
-				{
-					"dataset": {
 						"referenceName": "ds_DimViolation",
 						"type": "DatasetReference"
 					},
@@ -24,6 +17,16 @@
 						"type": "DatasetReference"
 					},
 					"name": "DimViolaiton"
+				},
+				{
+					"dataset": {
+						"referenceName": "Parquet_ChicagoCleaned",
+						"type": "DatasetReference"
+					},
+					"name": "pqtChicago"
+				},
+				{
+					"name": "pqtDallas"
 				}
 			],
 			"sinks": [
@@ -53,21 +56,21 @@
 				},
 				{
 					"name": "select2"
+				},
+				{
+					"name": "derivedColumn2"
+				},
+				{
+					"name": "derivedColumn3"
+				},
+				{
+					"name": "union1"
 				}
 			],
 			"scriptLines": [
 				"parameters{",
 				"     Job_Id as string ('49')",
 				"}",
-				"source(output(",
-				"          Violation_Code as double,",
-				"          Violation_Description as string,",
-				"          DATA_SOURCE_ID as string",
-				"     ),",
-				"     allowSchemaDrift: true,",
-				"     validateSchema: false,",
-				"     ignoreNoFilesFound: false,",
-				"     format: 'parquet') ~> source1",
 				"source(output(",
 				"          MAXVIOLATIONSK as decimal(38,0)",
 				"     ),",
@@ -77,7 +80,7 @@
 				"     format: 'query') ~> DimViolationMaxId",
 				"source(output(",
 				"          VIOLATION_ID_SK as decimal(38,0),",
-				"          VIOLATION_CODE as double,",
+				"          VIOLATION_CODE as string,",
 				"          VIOLATION_DESCRIPTION as string,",
 				"          DATA_SOURCE_ID as string,",
 				"          DATA_WORKFLOW_NAME as string,",
@@ -87,20 +90,47 @@
 				"     allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     format: 'table') ~> DimViolaiton",
-				"source1, DimViolationMaxId join(1==1,",
+				"source(output(",
+				"          Inspection_ID as long,",
+				"          DBA_Name as string,",
+				"          AKA_Name as string,",
+				"          License_Num as string,",
+				"          Facility_Type as string,",
+				"          Risk as string,",
+				"          Address as string,",
+				"          City as string,",
+				"          State as string,",
+				"          Zip_Code as string,",
+				"          Inspection_Date as date,",
+				"          Inspection_Type as string,",
+				"          Results as string,",
+				"          Violation_Code as string,",
+				"          Violation_Description as string,",
+				"          Violation_Comment as string,",
+				"          Latitude as double,",
+				"          Longitude as double,",
+				"          Location as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false,",
+				"     format: 'parquet') ~> pqtChicago",
+				"source(allowSchemaDrift: true,",
+				"     validateSchema: false) ~> pqtDallas",
+				"union1, DimViolationMaxId join(1==1,",
 				"     joinType:'cross',",
 				"     matchType:'exact',",
 				"     ignoreSpaces: false,",
 				"     broadcast: 'auto')~> join1",
-				"join1, DimViolaiton join(source1@Violation_Description == DimViolaiton@VIOLATION_DESCRIPTION,",
+				"join1, DimViolaiton join(pqtChicago@Violation_Description == DimViolaiton@VIOLATION_DESCRIPTION,",
 				"     joinType:'left',",
 				"     matchType:'exact',",
 				"     ignoreSpaces: false,",
 				"     broadcast: 'auto')~> join2",
 				"join2 select(mapColumn(",
-				"          Violation_Code = source1@Violation_Code,",
-				"          Violation_Description = source1@Violation_Description,",
-				"          DATA_SOURCE_ID = source1@DATA_SOURCE_ID,",
+				"          Violation_Code = pqtChicago@Violation_Code,",
+				"          Violation_Description = pqtChicago@Violation_Description,",
+				"          DATA_SOURCE_ID = pqtChicago@DATA_SOURCE_ID,",
 				"          MAXVIOLATIONSK",
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
@@ -123,11 +153,14 @@
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true) ~> select2",
+				"pqtChicago derive(DATA_SOURCE_ID = 'Chicago23') ~> derivedColumn2",
+				"pqtDallas derive(DATA_SOURCE_ID = 'Dallas23') ~> derivedColumn3",
+				"derivedColumn2, derivedColumn3 union(byName: false)~> union1",
 				"select2 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     input(",
 				"          VIOLATION_ID_SK as decimal(38,0),",
-				"          VIOLATION_CODE as double,",
+				"          VIOLATION_CODE as string,",
 				"          VIOLATION_DESCRIPTION as string,",
 				"          DATA_SOURCE_ID as string,",
 				"          DATA_WORKFLOW_NAME as string,",

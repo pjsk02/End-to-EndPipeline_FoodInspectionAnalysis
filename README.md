@@ -1,7 +1,4 @@
 # 🏙️ Food Inspections Data Warehouse Project  
-### 👥 Team Members  
-Je Sai Kailash Pulipati · Deepthi Ramesh · Geetika Barla  
-
 ---
 
 ## 📌 Summary  
@@ -79,19 +76,6 @@ Implemented the **Bronze → Silver → Gold** architecture using Snowflake & Az
 ✅ All tables created and loaded via **Azure Data Factory pipelines**
 
 ---
-
-## 📊 Power BI Dashboard  
-
-Built an interactive BI report with:  
-- 📆 Temporal trends in inspections  
-- 🏚️ High-risk restaurant identification  
-- ⚠️ Violation frequency analysis  
-- 🌍 Geographical heatmaps of inspection results  
-
-> 🔗 _Sample screenshots can be added here if you're sharing publicly_
-
----
-
 ## 📈 Key Skills Demonstrated  
 
 - ⛓️ End-to-End Data Pipeline Creation  
@@ -109,6 +93,45 @@ Built an interactive BI report with:
 ✔️ Strong grasp of **BI tools**, **SQL**, **ETL**, and **cloud data platforms**
 
 ---
+
+## Dimensional Model
+
+![DimensionalModel](https://github.com/user-attachments/assets/76a07d40-1e9f-4a73-a0d6-7d53d939a6af)
+
+---
+
+## Pipeline (Azure Data Factory)
+
+![DataPipeline](https://github.com/user-attachments/assets/46c88787-82a2-4c80-9733-c79720b0c662)
+
+---
+
+## 📊 Power BI Dashboard  
+
+Built an interactive BI report with:  
+- 📆 Temporal trends in inspections  
+- 🏚️ High-risk restaurant identification  
+- ⚠️ Violation frequency analysis  
+- 🌍 Geographical heatmaps of inspection results  
+
+![Dashboard_HomeScreen](https://github.com/user-attachments/assets/1d825e36-3544-4a53-a531-8ddf22571ca4)
+
+![Dashboard_P1_InspectionSumary](https://github.com/user-attachments/assets/f55ef30e-8c44-4434-b2cc-542f4944fbda)
+
+![Dashboard_P2_FcilityType_RiskAnalysis](https://github.com/user-attachments/assets/501f3ee3-7f76-40d9-bf45-9904b08b136c)
+
+![Dashboard_P3_RiskAnalysis](https://github.com/user-attachments/assets/0a8ef768-42df-4bc2-bbb3-688e9c237af6)
+
+![Dashboard_P4_LocationInsights](https://github.com/user-attachments/assets/ee406600-70b2-43e6-81b6-1bea6d1400bc)
+
+![Dashboard_P5_TopViolatoins](https://github.com/user-attachments/assets/c776c17f-df97-4c22-b42c-9c39470c362d)
+
+![Dashboard_P6_AIPowered_BusinessInsights](https://github.com/user-attachments/assets/abaed663-822d-4b25-972b-93ff0895fcb8)
+
+![Dashboard_P7_BusinessInsightsReport](https://github.com/user-attachments/assets/287fc845-5159-42d4-bd43-807256a8c037)
+
+---
+
 **Feel free to fork, explore, and contribute!**
 📬 Let’s connect on [LinkedIn](https://www.linkedin.com/in/je-pulipati/) If you’re hiring for Data Engineering, Analytics, or BI intern roles im open hiring!
 

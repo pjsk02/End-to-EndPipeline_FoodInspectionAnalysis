@@ -1,7 +1,4 @@
 # 🏙️ Food Inspections Data Warehouse Project  
-### 👥 Team Members  
-Je Sai Kailash Pulipati · Deepthi Ramesh · Geetika Barla  
-
 ---
 
 ## 📌 Summary  
@@ -78,6 +75,12 @@ Implemented the **Bronze → Silver → Gold** architecture using Snowflake & Az
 
 ✅ All tables created and loaded via **Azure Data Factory pipelines**
 
+---
+
+---
+
+## Dimensional Model
+![Dimensional Model Overview](./assets/DimensionalModel.png)
 ---
 
 ## 📊 Power BI Dashboard  

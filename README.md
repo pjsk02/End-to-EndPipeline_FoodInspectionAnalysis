@@ -1,6 +1,8 @@
 # 🏙️ Food Inspections Data Warehouse Project  
----
 
+### Dashboard Link : https://app.powerbi.com/groups/me/reports/2b0f49c5-e2d0-4b6c-afe1-128b4303dc6f/7638e95db92838a5585c?experience=power-bi
+
+---
 ## 📌 Summary  
 
 🚀 **End-to-End Data Pipeline & BI Project** using real-world food inspection datasets from **Chicago** and **Dallas**.  

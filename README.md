@@ -76,14 +76,27 @@ Implemented the **Bronze → Silver → Gold** architecture using Snowflake & Az
 ✅ All tables created and loaded via **Azure Data Factory pipelines**
 
 ---
+## 📈 Key Skills Demonstrated  
+
+- ⛓️ End-to-End Data Pipeline Creation  
+- 🗄️ Dimensional Modeling & Data Warehouse Development  
+- 🧹 Advanced Data Cleaning (Regex, Parsing, Reshaping)  
+- 🔁 ETL Orchestration using **Azure Data Factory**  
+- 📊 KPI Dashboarding in **Power BI**  
+
+---
+
+## 🎯 What This Project Proves  
+
+✔️ My ability to manage real-world messy data and convert it into structured, insightful assets  
+✔️ End-to-end ownership of **data engineering** and **analytics pipeline**  
+✔️ Strong grasp of **BI tools**, **SQL**, **ETL**, and **cloud data platforms**
 
 ---
 
 ## Dimensional Model
 
 ![DimensionalModel](https://github.com/user-attachments/assets/76a07d40-1e9f-4a73-a0d6-7d53d939a6af)
-
----
 
 ---
 
@@ -119,23 +132,6 @@ Built an interactive BI report with:
 
 ---
 
-## 📈 Key Skills Demonstrated  
-
-- ⛓️ End-to-End Data Pipeline Creation  
-- 🗄️ Dimensional Modeling & Data Warehouse Development  
-- 🧹 Advanced Data Cleaning (Regex, Parsing, Reshaping)  
-- 🔁 ETL Orchestration using **Azure Data Factory**  
-- 📊 KPI Dashboarding in **Power BI**  
-
----
-
-## 🎯 What This Project Proves  
-
-✔️ My ability to manage real-world messy data and convert it into structured, insightful assets  
-✔️ End-to-end ownership of **data engineering** and **analytics pipeline**  
-✔️ Strong grasp of **BI tools**, **SQL**, **ETL**, and **cloud data platforms**
-
----
 **Feel free to fork, explore, and contribute!**
 📬 Let’s connect on [LinkedIn](https://www.linkedin.com/in/je-pulipati/) If you’re hiring for Data Engineering, Analytics, or BI intern roles im open hiring!
 
